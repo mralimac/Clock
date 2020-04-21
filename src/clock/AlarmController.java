@@ -43,15 +43,18 @@ public class AlarmController {
         {
             return 0;
         }
-        /*
+        
         int size = queue.getSize();
         //PriorityItemist = queue.toArray();
         for(int i = 0; i < size; i++)
         {
            PriorityItem item = queue.getObject(i);
-           item.getItem().getHour();
+           AlarmModel model = (AlarmModel) item.getItem();
+           int hour = model.getHour();
+           java.util.Date date = null;
+           int currentHour = (int)(date.getTime() % 86400000) / 3600000;
         }
-        */
+        
         return 0;
     }
     
