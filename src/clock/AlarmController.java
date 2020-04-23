@@ -50,12 +50,73 @@ public class AlarmController {
         {
            PriorityItem item = queue.getObject(i);
            AlarmModel model = (AlarmModel) item.getItem();
-           int hour = model.getHour();
-           java.util.Date date = null;
-           int currentHour = (int)(date.getTime() % 86400000) / 3600000;
+           
+           if(isAfterCurrentTime(model) && isAfterCurrentTime(newAlarm))
+           {
+               
+           }
+           
+           
+        }
+        return 0;
+    }
+    
+    public boolean compareTwoAlarm(AlarmModel alarm1, AlarmModel alarm2)
+    {
+        return false;
+    }
+    
+    
+    public boolean isAfterCurrentTime(AlarmModel model){
+        java.util.Date date = null;
+        
+        int hour = model.getHour();
+        int min = model.getMin();
+        int sec = model.getSec();
+        
+        int currentHour = (int)(date.getTime() % 86400000) / 3600000;
+        int currentMin = (int)(date.getTime() % 86400000) / 60000;
+        int currentSec = (int)(date.getTime() % 86400000) / 1000;
+        
+        if(hour > currentHour)
+        {
+            return true;
         }
         
-        return 0;
+        if(hour < currentHour)
+        {
+            return false;
+        }
+        
+        if(hour == currentHour)
+        {
+            if(min > currentMin)
+            {
+                return true;
+            }
+            if(min < currentMin)
+            {
+                return false;
+            }
+            
+            if(min == currentMin)
+            {
+                if(sec > currentSec)
+                {
+                    return true;
+                }
+                if(sec < currentSec)
+                {
+                    return false;
+                }
+                
+                if(sec == currentSec)
+                {
+                    return true;
+                }
+            }
+        }
+        return true;
     }
     
     public void showAlarm(){
