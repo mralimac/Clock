@@ -5,6 +5,7 @@
  */
 package clock;
 
+import java.util.Date;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,11 +19,13 @@ public class AlarmModel {
     protected int hour;
     protected int min;
     protected int sec;
+    protected Date date;
     
-    public AlarmModel(int hour, int min, int sec){
+    public AlarmModel(int hour, int min, int sec, Date date){
         this.hour = hour;
         this.min = min;
         this.sec = sec;
+        this.date = date;
     }
     
     public void setHour(int hour)

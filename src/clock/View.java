@@ -40,14 +40,14 @@ public class View implements Observer {
         
         button.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){  
-                alarmController.showAlarm();
+                alarmController.openAlarmDialog();
             }  
         });
        
         JPanel alarmPanel = new JPanel();
         alarmPanel.setLayout(new GridLayout(5,1));
         
-        alarmPanel.add(new JButton("Alarm 1"));
+        //alarmPanel.add(new JButton("Alarm 1"));
         //alarmPanel.add(new JButton("Alarm 2"));
         //alarmPanel.add(new JButton("Alarm 3"));
         //alarmPanel.add(new JButton("Alarm 4"));

@@ -5,10 +5,21 @@
  */
 package clock;
 
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
 /**
  *
  * @author mralimac
@@ -23,101 +34,146 @@ public class AlarmController {
     
     public void openAlarmDialog()
     {
-        JOptionPane setAlarmPopup = new JOptionPane();
-        JFrame frame = new JFrame();
-        setAlarmPopup.showMessageDialog(frame, "Set Alarm Dialog");
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(5,1));
+        
+        JLabel timeLabel = new JLabel();
+        timeLabel.setText("Enter Time as hh:mm:ss");
+        
+        JLabel dateLabel = new JLabel();
+        dateLabel.setText("Enter Date as DD/MM/YY");
+        
+        
+        MaskFormatter timeMask = null;
+        MaskFormatter dateMask = null;
+        
+        try {
+            timeMask = new MaskFormatter("##:##:##");//the # is for numeric values
+            timeMask.setPlaceholderCharacter('#');
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        
+        
+        try {
+            dateMask = new MaskFormatter("##/##/##");//the # is for numeric values
+            dateMask.setPlaceholderCharacter('#');
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        
+        
+        final JFormattedTextField timeFormat = new JFormattedTextField(timeMask);
+        final JFormattedTextField dateFormat = new JFormattedTextField(dateMask);
+       
+        timeFormat.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                  System.out.println("Hi");
+              }
+            }
+            public void removeUpdate(DocumentEvent e) {
+              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                  System.out.println("Hi");
+              }
+            }
+            public void insertUpdate(DocumentEvent e) {
+              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                  System.out.println("Hi");
+              }
+            }
+        });
+        
+        
+        dateFormat.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                  System.out.println("Hi");
+              }
+            }
+            public void removeUpdate(DocumentEvent e) {
+              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                  System.out.println("Hi");
+              }
+            }
+            public void insertUpdate(DocumentEvent e) {
+              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                  System.out.println("Hi");
+              }
+            }
+        });
+        
+        panel.add(timeLabel);
+        panel.add(timeFormat);
+        panel.add(dateLabel);
+        panel.add(dateFormat);
+        JOptionPane.showMessageDialog(null, panel);
+        
     }
     
-    public void addAlarm(int hour, int min, int sec){
-        AlarmModel newAlarm = new AlarmModel(hour, min, sec);
-        int priority = this.figureOutPriority(newAlarm);
+    public boolean isDateTimeValid(String timeFormat, String dateFormat){
+        
+        if(timeFormat.contains("#")){
+            return false;
+        }
+        
+        if(dateFormat.contains("#")){
+            return false;
+        }
+        
+        String[] timeFormatArray = timeFormat.split(":");
+        String[] dateFormatArray = dateFormat.split("/");
+       
+        
+        int hour = Integer.parseInt(timeFormatArray[0]);
+        int min = Integer.parseInt(timeFormatArray[1]);
+        int sec = Integer.parseInt(timeFormatArray[2]);
+        
+        int day = Integer.parseInt(dateFormatArray[0]);
+        int month = Integer.parseInt(dateFormatArray[1]);
+        int year = Integer.parseInt(dateFormatArray[2]);
+        
+        if(hour > 23){
+            return false;
+        }
+        
+        if(min > 60){
+            return false;
+        }
+        
+        if(sec > 60){
+            return false;
+        }
+        
+        if(day > 31){
+            return false;
+        }
+        
+        if(month > 12){
+            return false;
+        }
+        
+        if(year < 1980){
+            return false;
+        }
+        
+        
+        return true;
+    }
+    
+    public void addAlarm(int hour, int min, int sec, Date date){
+        AlarmModel newAlarm = new AlarmModel(hour, min, sec, date);
+        String parseAbleString = date.toString()+"T"+hour+":"+min+":"+sec;
+        LocalDateTime dateTime = LocalDateTime.parse(parseAbleString);
+        int priority = (int) dateTime.toEpochSecond(ZoneOffset.UTC);
+       
         try {
             queue.add(newAlarm, priority);
         } catch (QueueOverflowException e) {
             System.out.println("Add operation failed: " + e);
         }
     }
-        
-    public int figureOutPriority(AlarmModel newAlarm){
-        if(queue.isEmpty())
-        {
-            return 0;
-        }
-        
-        int size = queue.getSize();
-        //PriorityItemist = queue.toArray();
-        for(int i = 0; i < size; i++)
-        {
-           PriorityItem item = queue.getObject(i);
-           AlarmModel model = (AlarmModel) item.getItem();
-           
-           if(isAfterCurrentTime(model) && isAfterCurrentTime(newAlarm))
-           {
-               
-           }
-           
-           
-        }
-        return 0;
-    }
     
-    public boolean compareTwoAlarm(AlarmModel alarm1, AlarmModel alarm2)
-    {
-        return false;
-    }
-    
-    
-    public boolean isAfterCurrentTime(AlarmModel model){
-        java.util.Date date = null;
-        
-        int hour = model.getHour();
-        int min = model.getMin();
-        int sec = model.getSec();
-        
-        int currentHour = (int)(date.getTime() % 86400000) / 3600000;
-        int currentMin = (int)(date.getTime() % 86400000) / 60000;
-        int currentSec = (int)(date.getTime() % 86400000) / 1000;
-        
-        if(hour > currentHour)
-        {
-            return true;
-        }
-        
-        if(hour < currentHour)
-        {
-            return false;
-        }
-        
-        if(hour == currentHour)
-        {
-            if(min > currentMin)
-            {
-                return true;
-            }
-            if(min < currentMin)
-            {
-                return false;
-            }
-            
-            if(min == currentMin)
-            {
-                if(sec > currentSec)
-                {
-                    return true;
-                }
-                if(sec < currentSec)
-                {
-                    return false;
-                }
-                
-                if(sec == currentSec)
-                {
-                    return true;
-                }
-            }
-        }
-        return true;
-    }
     
     public void showAlarm(){
         //System.out.println(queue.toArray());
