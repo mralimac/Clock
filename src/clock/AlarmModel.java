@@ -5,10 +5,10 @@
  */
 package clock;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+
 
 /**
  *
@@ -31,5 +31,12 @@ public class AlarmModel {
     public void setDate(Date date)
     {
         this.date = date;
+    }
+    
+    public String getString()
+    {        
+        DateFormat d = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+        
+        return d.format(this.date);
     }
 }

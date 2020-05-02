@@ -77,7 +77,7 @@ public class AlarmController {
             public void insertUpdate(DocumentEvent e) {
               System.out.println("Button Pressed");
               if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  System.out.println("Hi");
+                  
               }
             }
         });
@@ -87,14 +87,14 @@ public class AlarmController {
             public void changedUpdate(DocumentEvent e) {}
             public void removeUpdate(DocumentEvent e) {
               if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                System.out.println("Hi");
+                
               }
             }
             
             
             public void insertUpdate(DocumentEvent e) {
               if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                System.out.println("Hi");
+                
               }
             }
         });
@@ -123,6 +123,11 @@ public class AlarmController {
     
     public void errorDialog(String message){
         JOptionPane.showMessageDialog(null, message);
+    }
+    
+    public AlarmModel getNextAlarm() throws QueueUnderflowException
+    {
+        return queue.head();
     }
     
     public boolean isDateTimeValid(String timeFormat, String dateFormat){
@@ -198,8 +203,6 @@ public class AlarmController {
     {
         try {
             AlarmModel nextAlarm = queue.head();
-            System.out.println(nextAlarm.getDate().getTime());
-            System.out.println(Instant.now().toEpochMilli());
             long now = Instant.now().toEpochMilli();
             if(nextAlarm.getDate().getTime() < now)
             {
