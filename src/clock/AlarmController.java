@@ -107,7 +107,7 @@ public class AlarmController {
         panel.add(timeFormat);
         panel.add(dateLabel);
         panel.add(dateFormat);
-        JOptionPane.showMessageDialog(null, panel);
+        JOptionPane.showConfirmDialog(null, panel);
         
     }
     
@@ -123,7 +123,24 @@ public class AlarmController {
         
         String[] timeFormatArray = timeFormat.split(":");
         String[] dateFormatArray = dateFormat.split("/");
-       
+
+        for(int i = 0; i < timeFormatArray.length; i++)
+        {
+            try{
+                Integer.parseInt(timeFormatArray[i]);
+            }catch(NumberFormatException e){
+                return false;
+            }
+        }
+        
+        for(int i = 0; i < dateFormatArray.length; i++)
+        {
+            try{
+                Integer.parseInt(dateFormatArray[i]);
+            }catch(NumberFormatException e){
+                return false;
+            }
+        }
         
         int hour = Integer.parseInt(timeFormatArray[0]);
         int min = Integer.parseInt(timeFormatArray[1]);
