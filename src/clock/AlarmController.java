@@ -6,12 +6,15 @@
 package clock;
 
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,7 +44,7 @@ public class AlarmController {
         timeLabel.setText("Enter Time as hh:mm:ss");
         
         JLabel dateLabel = new JLabel();
-        dateLabel.setText("Enter Date as DD/MM/YY");
+        dateLabel.setText("Enter Date as DD/MM/YYYY");
         
         
         MaskFormatter timeMask = null;
@@ -56,7 +59,7 @@ public class AlarmController {
         
         
         try {
-            dateMask = new MaskFormatter("##/##/##");//the # is for numeric values
+            dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
             dateMask.setPlaceholderCharacter('#');
         } catch (ParseException e) {
             e.printStackTrace();
@@ -67,17 +70,12 @@ public class AlarmController {
         final JFormattedTextField dateFormat = new JFormattedTextField(dateMask);
        
         timeFormat.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) {
-              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  System.out.println("Hi");
-              }
-            }
-            public void removeUpdate(DocumentEvent e) {
-              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  System.out.println("Hi");
-              }
-            }
+            public void changedUpdate(DocumentEvent e){}
+            public void removeUpdate(DocumentEvent e) {}
+            
+            
             public void insertUpdate(DocumentEvent e) {
+              System.out.println("Button Pressed");
               if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
                   System.out.println("Hi");
               }
@@ -86,19 +84,17 @@ public class AlarmController {
         
         
         dateFormat.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) {
-              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  System.out.println("Hi");
-              }
-            }
+            public void changedUpdate(DocumentEvent e) {}
             public void removeUpdate(DocumentEvent e) {
               if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  System.out.println("Hi");
+                System.out.println("Hi");
               }
             }
+            
+            
             public void insertUpdate(DocumentEvent e) {
               if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  System.out.println("Hi");
+                System.out.println("Hi");
               }
             }
         });
@@ -107,8 +103,26 @@ public class AlarmController {
         panel.add(timeFormat);
         panel.add(dateLabel);
         panel.add(dateFormat);
-        JOptionPane.showConfirmDialog(null, panel);
+        int dialogBox = JOptionPane.showConfirmDialog(null, panel, "Create Alarm", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         
+        if (dialogBox == JOptionPane.OK_OPTION) {
+            
+            if(!isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
+                errorDialog("Incorrect time format");
+            }else{
+                try{
+                    String combinedString = dateFormat.getText() + " " + timeFormat.getText();
+                    Date date = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse(combinedString);  
+                    addAlarm(date);
+                }catch(ParseException e){
+                    errorDialog("Unable to convert date");
+                }
+            }
+        }
+    }
+    
+    public void errorDialog(String message){
+        JOptionPane.showMessageDialog(null, message);
     }
     
     public boolean isDateTimeValid(String timeFormat, String dateFormat){
@@ -123,32 +137,25 @@ public class AlarmController {
         
         String[] timeFormatArray = timeFormat.split(":");
         String[] dateFormatArray = dateFormat.split("/");
+        int hour;
+        int min;
+        int sec;
+        
+        int day;
+        int month;
+        int year;
+        
+        try{
+            hour = Integer.parseInt(timeFormatArray[0]);
+            min = Integer.parseInt(timeFormatArray[1]);
+            sec = Integer.parseInt(timeFormatArray[2]);
 
-        for(int i = 0; i < timeFormatArray.length; i++)
-        {
-            try{
-                Integer.parseInt(timeFormatArray[i]);
-            }catch(NumberFormatException e){
-                return false;
-            }
+            day = Integer.parseInt(dateFormatArray[0]);
+            month = Integer.parseInt(dateFormatArray[1]);
+            year = Integer.parseInt(dateFormatArray[2]);
+        }catch(NumberFormatException e){
+            return false;
         }
-        
-        for(int i = 0; i < dateFormatArray.length; i++)
-        {
-            try{
-                Integer.parseInt(dateFormatArray[i]);
-            }catch(NumberFormatException e){
-                return false;
-            }
-        }
-        
-        int hour = Integer.parseInt(timeFormatArray[0]);
-        int min = Integer.parseInt(timeFormatArray[1]);
-        int sec = Integer.parseInt(timeFormatArray[2]);
-        
-        int day = Integer.parseInt(dateFormatArray[0]);
-        int month = Integer.parseInt(dateFormatArray[1]);
-        int year = Integer.parseInt(dateFormatArray[2]);
         
         if(hour > 23){
             return false;
@@ -170,47 +177,40 @@ public class AlarmController {
             return false;
         }
         
-        if(year < 1980){
-            return false;
-        }
-        
-        
         return true;
     }
     
-    public void addAlarm(int hour, int min, int sec, Date date){
-        AlarmModel newAlarm = new AlarmModel(hour, min, sec, date);
-        String parseAbleString = date.toString()+"T"+hour+":"+min+":"+sec;
-        LocalDateTime dateTime = LocalDateTime.parse(parseAbleString);
-        int priority = (int) dateTime.toEpochSecond(ZoneOffset.UTC);
+    public void addAlarm(Date date){
+        
+        AlarmModel newAlarm = new AlarmModel(date);
+        System.out.println(date);
+        int priority = (int) date.getTime();
        
         try {
             queue.add(newAlarm, priority);
+            errorDialog("Things");
         } catch (QueueOverflowException e) {
             System.out.println("Add operation failed: " + e);
         }
     }
     
-    
-    public void showAlarm(){
-        //System.out.println(queue.toArray());
-    }
-    
-    public int getNumberOfAlarms(){
-        return 0;
-    }
-    
-    public JPanel getPanel(int index)
+    public void checkAlarm() 
     {
-        return null;
+        try {
+            AlarmModel nextAlarm = queue.head();
+            System.out.println(nextAlarm.getDate().getTime());
+            System.out.println(Instant.now().toEpochMilli());
+            long now = Instant.now().toEpochMilli();
+            if(nextAlarm.getDate().getTime() < now)
+            {
+                JOptionPane alarmPopup = new JOptionPane();
+                JFrame f = new JFrame();
+                alarmPopup.showMessageDialog(f, "Alarm Triggered");
+                queue.remove();
+            }
+            
+        } catch (QueueUnderflowException ex) {
+           
+        }
     }
-    
-    //Triggers the alarm that would be at the front of the queue.
-    public void triggerAlarm()
-    {
-        JOptionPane alarmPopup = new JOptionPane();
-        JFrame f = new JFrame();
-        alarmPopup.showMessageDialog(f, "Alarm Triggered");
-    }
-    
 }

@@ -10,10 +10,11 @@ import java.util.Observable;
 public class View implements Observer {
     
     ClockPanel panel;
+    AlarmController alarmController = new AlarmController();
     
     public View(Model model) {
         
-        final AlarmController alarmController = new AlarmController();
+        
         JFrame frame = new JFrame();
         panel = new ClockPanel(model);
         //frame.setContentPane(panel);
@@ -63,5 +64,6 @@ public class View implements Observer {
     
     public void update(Observable o, Object arg) {
         panel.repaint();
+        alarmController.checkAlarm();
     }
 }

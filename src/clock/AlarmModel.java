@@ -16,45 +16,20 @@ import javax.swing.JPanel;
  */
 public class AlarmModel {
     
-    protected int hour;
-    protected int min;
-    protected int sec;
     protected Date date;
     
-    public AlarmModel(int hour, int min, int sec, Date date){
-        this.hour = hour;
-        this.min = min;
-        this.sec = sec;
+    public AlarmModel(Date date){
+        
         this.date = date;
     }
     
-    public void setHour(int hour)
+    public Date getDate()
     {
-        this.hour = hour; 
+        return this.date;
     }
     
-    public void setMin(int min)
+    public void setDate(Date date)
     {
-        this.min = min;
-    }
-    
-    public void setSec(int sec)
-    {
-        this.sec = sec;
-    }
-    
-    public int getHour()
-    {
-       return this.hour; 
-    }
-    
-    public int getMin()
-    {
-        return this.min;
-    }
-    
-    public int getSec()
-    {
-        return this.sec;
+        this.date = date;
     }
 }
