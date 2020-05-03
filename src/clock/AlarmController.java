@@ -6,15 +6,15 @@
 package clock;
 
 import java.awt.GridLayout;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFormattedTextField;
@@ -22,11 +22,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
-import org.json.JSONObject;
-import org.json.JSONArray;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+//import org.json.simple.parser.ParseException;
 /**
  *
  * @author mralimac
@@ -110,6 +111,8 @@ public class AlarmController {
     {
         int cap = queue.getSize();
         
+        JSONObject object = new JSONObject();
+        
         JSONArray jsonArray = new JSONArray();
         
         for(int i = 0; cap >= i; i++)
@@ -120,12 +123,14 @@ public class AlarmController {
             Date alarmDate = alarmModel.getDate();
             
             JSONObject alarmObject = new JSONObject();
-            alarmObject.put("date", alarmDate);
+            alarmObject.put("date", alarmDate.toString());
             
-            jsonArray.put(alarmObject);
+            jsonArray.add(alarmObject);
+            
+            object.put("alarms", alarmObject);
             
             try (FileWriter file = new FileWriter("alarms.json")) {
-                file.write(jsonArray.toString());
+                file.write(object.toJSONString());
                 file.flush();
 
             } catch (IOException e) {
@@ -135,6 +140,26 @@ public class AlarmController {
     
     public void loadAlarms()
     {
+        JSONParser parse = new JSONParser();
+        try(FileReader read = new FileReader("alarms.json"))
+        {
+            JSONObject jsonObject = (JSONObject) parse.parse(read);
+            JSONArray msg = (JSONArray) jsonObject.get("alarms");
+            Iterator<String> iterator = msg.iterator();
+            while (iterator.hasNext()) {
+                System.out.println(iterator.next());
+            }
+
+        }catch(FileNotFoundException e)
+        {
+            
+        }catch(IOException e)
+        {
+            
+        } catch (org.json.simple.parser.ParseException ex) {
+            
+        }
+        
         
     }
     
