@@ -52,6 +52,10 @@ public interface PriorityQueue<T> {
     
     public int getSize();
 
-    
-    public PriorityItem getObject(int index);
+    /**
+     *
+     * @param index
+     * @return
+     */
+    public T getItemAtIndex(int index);
 }

@@ -20,8 +20,8 @@ public class View implements Observer {
         JFrame frame = new JFrame();
         panel = new ClockPanel(model);
         
-        //frame.setContentPane(panel);
         frame.setTitle("Java Clock");
+        panel.setSize(1000,500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                
         final Container pane = frame.getContentPane();
@@ -35,11 +35,29 @@ public class View implements Observer {
         alarmPanel.setLayout(new GridLayout(5,1));
         pane.add(alarmPanel, BorderLayout.LINE_END);
         
+        JButton loadButton = new JButton("Load Alarms");
+        JButton saveButton = new JButton("Save Alarms");
+        JPanel loadSavePanel = new JPanel();
+        loadSavePanel.setLayout(new GridLayout(2,1));
+        pane.add(loadSavePanel, BorderLayout.LINE_START);
+        loadSavePanel.add(saveButton);
+        loadSavePanel.add(loadButton);
         
         button.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){  
                 alarmController.openAlarmDialog();
-                
+            }  
+        });
+        
+        saveButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){  
+                alarmController.saveAlarms();
+            }  
+        });
+        
+        loadButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){  
+                alarmController.loadAlarms();
             }  
         });
         
@@ -49,20 +67,24 @@ public class View implements Observer {
     
     public void addAlarm()
     {
-        
+        alarmPanel.removeAll();
         try {
             AlarmModel alarm = alarmController.getNextAlarm();
             
             if(alarm.getString() != "")
             { 
                 //System.out.println(alarm.getString());
+                
                 alarmPanel.add(new JButton(alarm.getString()));
+                alarmPanel.revalidate();
+                alarmPanel.repaint();
             }
             
         } catch (QueueUnderflowException ex) {
             
         }
-        
+        alarmPanel.revalidate();
+        alarmPanel.repaint();
         
     }
     

@@ -6,6 +6,8 @@
 package clock;
 
 import java.awt.GridLayout;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
+import org.json.JSONObject;
+import org.json.JSONArray;
 /**
  *
  * @author mralimac
@@ -68,36 +72,7 @@ public class AlarmController {
         
         final JFormattedTextField timeFormat = new JFormattedTextField(timeMask);
         final JFormattedTextField dateFormat = new JFormattedTextField(dateMask);
-       
-        timeFormat.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e){}
-            public void removeUpdate(DocumentEvent e) {}
-            
-            
-            public void insertUpdate(DocumentEvent e) {
-              System.out.println("Button Pressed");
-              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                  
-              }
-            }
-        });
-        
-        
-        dateFormat.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) {}
-            public void removeUpdate(DocumentEvent e) {
-              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                
-              }
-            }
-            
-            
-            public void insertUpdate(DocumentEvent e) {
-              if(isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                
-              }
-            }
-        });
+
         
         panel.add(timeLabel);
         panel.add(timeFormat);
@@ -108,7 +83,8 @@ public class AlarmController {
         if (dialogBox == JOptionPane.OK_OPTION) {
             
             if(!isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                errorDialog("Incorrect time format");
+                errorDialog("Unable to convert date");
+                openAlarmDialog();
             }else{
                 try{
                     String combinedString = dateFormat.getText() + " " + timeFormat.getText();
@@ -128,6 +104,38 @@ public class AlarmController {
     public AlarmModel getNextAlarm() throws QueueUnderflowException
     {
         return queue.head();
+    }
+    
+    public void saveAlarms()
+    {
+        int cap = queue.getSize();
+        
+        JSONArray jsonArray = new JSONArray();
+        
+        for(int i = 0; cap >= i; i++)
+        {
+            
+            AlarmModel alarmModel = queue.getItemAtIndex(i);
+            
+            Date alarmDate = alarmModel.getDate();
+            
+            JSONObject alarmObject = new JSONObject();
+            alarmObject.put("date", alarmDate);
+            
+            jsonArray.put(alarmObject);
+            
+            try (FileWriter file = new FileWriter("alarms.json")) {
+                file.write(jsonArray.toString());
+                file.flush();
+
+            } catch (IOException e) {
+            }
+        }
+    }
+    
+    public void loadAlarms()
+    {
+        
     }
     
     public boolean isDateTimeValid(String timeFormat, String dateFormat){
@@ -211,7 +219,6 @@ public class AlarmController {
                 alarmPopup.showMessageDialog(f, "Alarm Triggered");
                 queue.remove();
             }
-            
         } catch (QueueUnderflowException ex) {
            
         }

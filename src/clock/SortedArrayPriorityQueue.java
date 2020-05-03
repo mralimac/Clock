@@ -85,6 +85,7 @@ public class SortedArrayPriorityQueue<T> implements PriorityQueue<T> {
         }
     }
     
+    @Override
     public int getSize(){
         return this.capacity;
     }
@@ -94,8 +95,8 @@ public class SortedArrayPriorityQueue<T> implements PriorityQueue<T> {
         return tailIndex < 0;
     }
     
-    public PriorityItem getObject(int index) {
-        return ((PriorityItem<T>) storage[index]);
-    }
     
+    public T getItemAtIndex(int index) {
+        return ((PriorityItem<T>) storage[index]).getItem();
+    }
 }
