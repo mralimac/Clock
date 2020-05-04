@@ -34,12 +34,19 @@ public class View implements Observer {
         pane.add(panel, BorderLayout.CENTER);
          
         //Adding a button to the bottom of the window that'll let the user set an alarm
-        JButton button = new JButton("Set Alarm");
-        pane.add(button, BorderLayout.PAGE_END);
+        JButton setAlarmButton = new JButton("Set Alarm");
+        JButton exitButton = new JButton("Exit Program");
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new GridLayout(1,2));
+        bottomPanel.add(setAlarmButton);
+        bottomPanel.add(exitButton);
+        
+        
+        pane.add(bottomPanel, BorderLayout.PAGE_END);
 
         //Add a panel for displaying next alarm at top of window
         alarmPanel.setLayout(new GridLayout(5,1));
-        pane.add(alarmPanel, BorderLayout.PAGE_START);
+        pane.add(alarmPanel, BorderLayout.LINE_END);
         
         //Add a control panel to the left side of the screen for Save/Load buttons
         JButton loadButton = new JButton("Load Alarms");
@@ -51,7 +58,7 @@ public class View implements Observer {
         loadSavePanel.add(loadButton);
         
         //Add actions to the buttons in the GUI interface
-        button.addActionListener(new ActionListener(){
+        setAlarmButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 try{
                    openAlarmDialog();
@@ -80,10 +87,29 @@ public class View implements Observer {
                     if(alarmController.loadAlarms()){
                         JOptionPane.showMessageDialog(null, "Alarms loaded successfully");
                     }
-                }catch(Exception ex)
-                {
+                }catch(Exception ex){
                     JOptionPane.showMessageDialog(null, "Failed to load alarms");
                 }
+            }  
+        });
+        
+        exitButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){ 
+                int exitPane = JOptionPane.showConfirmDialog(null, "Do you want to save your alarms?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
+                if(exitPane == JOptionPane.OK_OPTION)
+                {
+                    try{
+                        if(alarmController.saveAlarms()){
+                            JOptionPane.showMessageDialog(null, "Alarms saved successfully");
+                        }
+                    }catch(Exception ex){
+                        JOptionPane.showMessageDialog(null, "Failed to saved alarms");
+                    }
+                    System.exit(0);
+                }else{
+                    System.exit(0);
+                }
+                
             }  
         });
         
@@ -91,22 +117,25 @@ public class View implements Observer {
         frame.setVisible(true);
     }
     
-    //This function will add or change the panel to the top to the next alarm
+    //This function will get the list of alarms in the queue and display them
     public void addAlarm() throws Exception
     {
         alarmPanel.removeAll();
-        AlarmModel alarm = alarmController.getNextAlarm();
-        if(!"".equals(alarm.getString()))
-        { 
-            alarmPanel.add(new JButton(alarm.getString()));
-            alarmPanel.revalidate();
-            alarmPanel.repaint();
-        }
-       
         alarmPanel.revalidate();
         alarmPanel.repaint();
+        for(int i = 0; i < alarmController.getSize(); i++)
+        {
+            try{
+                AlarmModel alarm = alarmController.getAlarmAtIndex(i);
+                alarmPanel.add(new JButton(alarm.getString()));
+                alarmPanel.revalidate();
+                alarmPanel.repaint();
+            }catch(NullPointerException e){
+            }
+        }
     }
     
+    //Updates the clock face and also checks if the alarm conditions are met
     @Override
     public void update(Observable o, Object arg) {
         panel.repaint();
@@ -118,7 +147,6 @@ public class View implements Observer {
             }
         }catch(Exception e)
         {
-            e.printStackTrace();
         }
     }
     
@@ -138,17 +166,12 @@ public class View implements Observer {
         MaskFormatter timeMask = null;
         MaskFormatter dateMask = null;
         
-        try {
-            timeMask = new MaskFormatter("##:##:##");//the # is for numeric values
-            timeMask.setPlaceholderCharacter('#');
-        } catch (ParseException e) {
-        }
+        timeMask = new MaskFormatter("##:##:##");//the # is for numeric values
+        timeMask.setPlaceholderCharacter('#');
+
+        dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
+        dateMask.setPlaceholderCharacter('#');
         
-        try {
-            dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
-            dateMask.setPlaceholderCharacter('#');
-        } catch (ParseException e) {
-        }
         
         final JFormattedTextField timeFormat = new JFormattedTextField(timeMask);
         final JFormattedTextField dateFormat = new JFormattedTextField(dateMask);
@@ -167,9 +190,10 @@ public class View implements Observer {
                 alarmController.addAlarm(date);
                 
             }catch(ParseException e){
+                JOptionPane.showMessageDialog(null, "Incorrect date format entered. Please retry");
                 openAlarmDialog();
             }catch(QueueOverflowException e){
-                
+                JOptionPane.showMessageDialog(null, "Cannot add anymore alarms. Queue is full");
             }
         }
     }

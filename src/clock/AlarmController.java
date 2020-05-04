@@ -19,11 +19,17 @@ import org.json.simple.parser.JSONParser;
 public class AlarmController {
     
     PriorityQueue<AlarmModel> queue;
+    int sizeOfQueue = 5;
+    
     
     public AlarmController(){
-        queue = new SortedArrayPriorityQueue<>(5);
+        queue = new SortedArrayPriorityQueue<>(sizeOfQueue);
     }
     
+    //This functions gets how large the queue size is
+    public int getSize(){
+        return queue.getSize();
+    }
     
    
     //This gets the alarm at the head of the queue
@@ -32,9 +38,15 @@ public class AlarmController {
         return queue.head();
     }
     
+    //This function removes the alarm from the front of the queue
     public void removeAlarm() throws QueueUnderflowException 
     {
         queue.remove();
+    }
+    
+    public AlarmModel getAlarmAtIndex(int index) throws NullPointerException
+    {
+       return queue.getItemAtIndex(index);
     }
     
     //This takes the alarms in the priority queue and writes them to a json file
@@ -91,7 +103,6 @@ public class AlarmController {
     //This function adds the alarm object to the priority queue
     public boolean addAlarm(Date date) throws QueueOverflowException {
         AlarmModel newAlarm = new AlarmModel(date);
-        System.out.println(date);
         int priority = (int) date.getTime();
         queue.add(newAlarm, priority);
         return true;

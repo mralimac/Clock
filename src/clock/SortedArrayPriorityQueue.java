@@ -82,6 +82,7 @@ public class SortedArrayPriorityQueue<T> implements PriorityQueue<T> {
                 storage[i] = storage[i + 1];
             }
             tailIndex = tailIndex - 1;
+            storage[tailIndex] = null;
         }
     }
     
