@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -23,7 +22,6 @@ import javax.swing.text.MaskFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.*;
 /**
  *
  * @author mralimac
@@ -36,6 +34,7 @@ public class AlarmController {
         queue = new SortedArrayPriorityQueue<>(5);
     }
     
+    //This shows a GUI interface for creating a new alarm object
     public void openAlarmDialog()
     {
         JPanel panel = new JPanel();
@@ -57,13 +56,11 @@ public class AlarmController {
         } catch (ParseException e) {
         }
         
-        
         try {
             dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
             dateMask.setPlaceholderCharacter('#');
         } catch (ParseException e) {
         }
-        
         
         final JFormattedTextField timeFormat = new JFormattedTextField(timeMask);
         final JFormattedTextField dateFormat = new JFormattedTextField(dateMask);
@@ -76,31 +73,30 @@ public class AlarmController {
         int dialogBox = JOptionPane.showConfirmDialog(null, panel, "Create Alarm", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         
         if (dialogBox == JOptionPane.OK_OPTION) {
-            
-            if(!isDateTimeValid(timeFormat.getText(), dateFormat.getText())){
-                errorDialog("Unable to convert date");
+            try{
+                String combinedString = dateFormat.getText() + " " + timeFormat.getText();
+                Date date = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse(combinedString);  
+                addAlarm(date);
+                messageDialog("Alarm added");
+            }catch(ParseException e){
+                messageDialog("Unable to convert date");
                 openAlarmDialog();
-            }else{
-                try{
-                    String combinedString = dateFormat.getText() + " " + timeFormat.getText();
-                    Date date = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse(combinedString);  
-                    addAlarm(date);
-                }catch(ParseException e){
-                    errorDialog("Unable to convert date");
-                }
             }
         }
     }
     
-    public void errorDialog(String message){
+    //This function is for displaying a message dialog to the user
+    public void messageDialog(String message){
         JOptionPane.showMessageDialog(null, message);
     }
     
+    //This gets the alarm at the head of the queue
     public AlarmModel getNextAlarm() throws QueueUnderflowException
     {
         return queue.head();
     }
     
+    //This takes the alarms in the priority queue and writes them to a json file
     public void saveAlarms()
     {
         JSONArray array = new JSONArray();
@@ -130,91 +126,41 @@ public class AlarmController {
        
     }
     
+    //This retrieves the file from a json file and attempts to add the alarms to the array
     public void loadAlarms()
     {
+        
         JSONParser jsonParser = new JSONParser();
         try (FileReader reader = new FileReader("alarms.json"))
         {
             //Read JSON file
             Object obj = jsonParser.parse(reader);
 
-            JSONArray employeeList = (JSONArray) obj;
-            
-            for(int i = 0; i < employeeList.size(); i++)
+            JSONArray listOfAlarms = (JSONArray) obj;
+            if(listOfAlarms.size() <= queue.getSize())
             {
-                JSONObject object = new JSONObject();
-                object = (JSONObject) employeeList.get(i);
-                
-                long date = (long) object.get("date");
-                Date convertedDate = new Date(date);
-                addAlarm(convertedDate);
+                for(int i = 0; i < listOfAlarms.size(); i++)
+                {
+                    JSONObject object = new JSONObject();
+                    object = (JSONObject) listOfAlarms.get(i);
+                    long date = (long) object.get("date");
+                    Date convertedDate = new Date(date);
+                    addAlarm(convertedDate);
+                }
+            }else{
+                messageDialog("Too many alarms in json file. Maximum of " + queue.getSize() + " allowed");
             }
- 
         } catch (FileNotFoundException e) {
-            errorDialog("alarms.json not found");
+            messageDialog("alarms.json not found");
         } catch (IOException e) {
-            errorDialog("Error reading file");
+            messageDialog("Error reading file");
         } catch (org.json.simple.parser.ParseException e) {
-            errorDialog("JSON Malformed");
+            messageDialog("JSON Malformed");
         }
     }
     
-    public boolean isDateTimeValid(String timeFormat, String dateFormat){
-        
-        if(timeFormat.contains("#")){
-            return false;
-        }
-        
-        if(dateFormat.contains("#")){
-            return false;
-        }
-        
-        String[] timeFormatArray = timeFormat.split(":");
-        String[] dateFormatArray = dateFormat.split("/");
-        int hour;
-        int min;
-        int sec;
-        
-        int day;
-        int month;
-        int year;
-        
-        try{
-            hour = Integer.parseInt(timeFormatArray[0]);
-            min = Integer.parseInt(timeFormatArray[1]);
-            sec = Integer.parseInt(timeFormatArray[2]);
-
-            day = Integer.parseInt(dateFormatArray[0]);
-            month = Integer.parseInt(dateFormatArray[1]);
-            year = Integer.parseInt(dateFormatArray[2]);
-        }catch(NumberFormatException e){
-            return false;
-        }
-        
-        if(hour > 23){
-            return false;
-        }
-        
-        if(min > 60){
-            return false;
-        }
-        
-        if(sec > 60){
-            return false;
-        }
-        
-        if(day > 31){
-            return false;
-        }
-        
-        if(month > 12){
-            return false;
-        }
-        
-        return true;
-    }
-    
-    public void addAlarm(Date date){
+    //This function adds the alarm object to the priority queue
+    public boolean addAlarm(Date date){
         AlarmModel newAlarm = new AlarmModel(date);
         System.out.println(date);
         int priority = (int) date.getTime();
@@ -223,9 +169,12 @@ public class AlarmController {
             queue.add(newAlarm, priority);
         } catch (QueueOverflowException e) {
             System.out.println("Add operation failed: " + e);
+            return false;
         }
+        return true;
     }
     
+    //This function checks to see if the next alarm is currently after the current time
     public void checkAlarm() 
     {
         try {
