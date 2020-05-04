@@ -5,20 +5,13 @@
  */
 package clock;
 
-import java.awt.GridLayout;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.text.MaskFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,6 +22,7 @@ import org.json.simple.parser.JSONParser;
 public class AlarmController {
     
     PriorityQueue<AlarmModel> queue;
+    AlarmView alarmView = new AlarmView();
     
     public AlarmController(){
         queue = new SortedArrayPriorityQueue<>(5);
@@ -37,57 +31,7 @@ public class AlarmController {
     //This shows a GUI interface for creating a new alarm object
     public void openAlarmDialog()
     {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(5,1));
-        
-        JLabel timeLabel = new JLabel();
-        timeLabel.setText("Enter Time as hh:mm:ss");
-        
-        JLabel dateLabel = new JLabel();
-        dateLabel.setText("Enter Date as DD/MM/YYYY");
-        
-        
-        MaskFormatter timeMask = null;
-        MaskFormatter dateMask = null;
-        
-        try {
-            timeMask = new MaskFormatter("##:##:##");//the # is for numeric values
-            timeMask.setPlaceholderCharacter('#');
-        } catch (ParseException e) {
-        }
-        
-        try {
-            dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
-            dateMask.setPlaceholderCharacter('#');
-        } catch (ParseException e) {
-        }
-        
-        final JFormattedTextField timeFormat = new JFormattedTextField(timeMask);
-        final JFormattedTextField dateFormat = new JFormattedTextField(dateMask);
-
-        
-        panel.add(timeLabel);
-        panel.add(timeFormat);
-        panel.add(dateLabel);
-        panel.add(dateFormat);
-        int dialogBox = JOptionPane.showConfirmDialog(null, panel, "Create Alarm", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        
-        if (dialogBox == JOptionPane.OK_OPTION) {
-            try{
-                String combinedString = dateFormat.getText() + " " + timeFormat.getText();
-                Date date = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse(combinedString);  
-                addAlarm(date);
-                messageDialog("Alarm added");
-            }catch(ParseException e){
-                messageDialog("Unable to convert date");
-                openAlarmDialog();
-            }
-        }
-    }
-    
-    //This function is for displaying a message dialog to the user
-    public void messageDialog(String message){
-        JOptionPane.showMessageDialog(null, message);
+        alarmView.show();
     }
     
     //This gets the alarm at the head of the queue
@@ -129,7 +73,6 @@ public class AlarmController {
     //This retrieves the file from a json file and attempts to add the alarms to the array
     public void loadAlarms()
     {
-        
         JSONParser jsonParser = new JSONParser();
         try (FileReader reader = new FileReader("alarms.json"))
         {
@@ -148,14 +91,14 @@ public class AlarmController {
                     addAlarm(convertedDate);
                 }
             }else{
-                messageDialog("Too many alarms in json file. Maximum of " + queue.getSize() + " allowed");
+                JOptionPane.showMessageDialog(null, "Too many alarms in json file. Maximum of " + queue.getSize() + " allowed");
             }
         } catch (FileNotFoundException e) {
-            messageDialog("alarms.json not found");
+            JOptionPane.showMessageDialog(null, "alarms.json not found");
         } catch (IOException e) {
-            messageDialog("Error reading file");
+            JOptionPane.showMessageDialog(null, "Error reading file");
         } catch (org.json.simple.parser.ParseException e) {
-            messageDialog("JSON Malformed");
+            JOptionPane.showMessageDialog(null, "JSON Malformed");
         }
     }
     
