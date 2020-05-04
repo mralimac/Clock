@@ -96,7 +96,8 @@ public class SortedArrayPriorityQueue<T> implements PriorityQueue<T> {
     }
     
     
-    public T getItemAtIndex(int index) {
+    public T getItemAtIndex(int index) throws NullPointerException
+    {
         return ((PriorityItem<T>) storage[index]).getItem();
     }
 }

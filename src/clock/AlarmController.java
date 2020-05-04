@@ -14,20 +14,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.text.MaskFormatter;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-//import org.json.simple.parser.ParseException;
+import org.json.*;
 /**
  *
  * @author mralimac
@@ -59,7 +55,6 @@ public class AlarmController {
             timeMask = new MaskFormatter("##:##:##");//the # is for numeric values
             timeMask.setPlaceholderCharacter('#');
         } catch (ParseException e) {
-            e.printStackTrace();
         }
         
         
@@ -67,7 +62,6 @@ public class AlarmController {
             dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
             dateMask.setPlaceholderCharacter('#');
         } catch (ParseException e) {
-            e.printStackTrace();
         }
         
         
@@ -109,58 +103,60 @@ public class AlarmController {
     
     public void saveAlarms()
     {
-        int cap = queue.getSize();
+        JSONArray array = new JSONArray();
+        int numberOfObjs = queue.getSize();
         
-        JSONObject object = new JSONObject();
-        
-        JSONArray jsonArray = new JSONArray();
-        
-        for(int i = 0; cap >= i; i++)
+        for(int i = 0; i < numberOfObjs; i++)
         {
-            
-            AlarmModel alarmModel = queue.getItemAtIndex(i);
-            
-            Date alarmDate = alarmModel.getDate();
-            
-            JSONObject alarmObject = new JSONObject();
-            alarmObject.put("date", alarmDate.toString());
-            
-            jsonArray.add(alarmObject);
-            
-            object.put("alarms", alarmObject);
-            
-            try (FileWriter file = new FileWriter("alarms.json")) {
-                file.write(object.toJSONString());
-                file.flush();
-
-            } catch (IOException e) {
+            try{
+                AlarmModel alarm = queue.getItemAtIndex(i);
+                JSONObject alarmJSON = new JSONObject();
+                long date = alarm.getDate().getTime();
+                alarmJSON.put("date", date);
+                array.add(alarmJSON);
+            }catch(NullPointerException e){
+                //Breaking the loop as there will be no more instances in the list
+                break;
             }
         }
+       
+        try (FileWriter file = new FileWriter("alarms.json")) {
+            JOptionPane.showMessageDialog(null, "Number of Alarms successfully saved: "+ array.size()) ;
+            file.write(array.toJSONString());
+            file.flush();
+
+        } catch (IOException e) {
+        }
+       
     }
     
     public void loadAlarms()
     {
-        JSONParser parse = new JSONParser();
-        try(FileReader read = new FileReader("alarms.json"))
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader("alarms.json"))
         {
-            JSONObject jsonObject = (JSONObject) parse.parse(read);
-            JSONArray msg = (JSONArray) jsonObject.get("alarms");
-            Iterator<String> iterator = msg.iterator();
-            while (iterator.hasNext()) {
-                System.out.println(iterator.next());
-            }
+            //Read JSON file
+            Object obj = jsonParser.parse(reader);
 
-        }catch(FileNotFoundException e)
-        {
+            JSONArray employeeList = (JSONArray) obj;
             
-        }catch(IOException e)
-        {
-            
-        } catch (org.json.simple.parser.ParseException ex) {
-            
+            for(int i = 0; i < employeeList.size(); i++)
+            {
+                JSONObject object = new JSONObject();
+                object = (JSONObject) employeeList.get(i);
+                
+                long date = (long) object.get("date");
+                Date convertedDate = new Date(date);
+                addAlarm(convertedDate);
+            }
+ 
+        } catch (FileNotFoundException e) {
+            errorDialog("alarms.json not found");
+        } catch (IOException e) {
+            errorDialog("Error reading file");
+        } catch (org.json.simple.parser.ParseException e) {
+            errorDialog("JSON Malformed");
         }
-        
-        
     }
     
     public boolean isDateTimeValid(String timeFormat, String dateFormat){
@@ -219,14 +215,12 @@ public class AlarmController {
     }
     
     public void addAlarm(Date date){
-        
         AlarmModel newAlarm = new AlarmModel(date);
         System.out.println(date);
         int priority = (int) date.getTime();
        
         try {
             queue.add(newAlarm, priority);
-            errorDialog("Things");
         } catch (QueueOverflowException e) {
             System.out.println("Add operation failed: " + e);
         }
@@ -239,9 +233,7 @@ public class AlarmController {
             long now = Instant.now().toEpochMilli();
             if(nextAlarm.getDate().getTime() < now)
             {
-                JOptionPane alarmPopup = new JOptionPane();
-                JFrame f = new JFrame();
-                alarmPopup.showMessageDialog(f, "Alarm Triggered");
+                JOptionPane.showMessageDialog(null, "Alarm Triggered");
                 queue.remove();
             }
         } catch (QueueUnderflowException ex) {
