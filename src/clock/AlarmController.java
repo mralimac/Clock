@@ -19,37 +19,68 @@ import org.json.simple.parser.JSONParser;
 public class AlarmController {
     
     PriorityQueue<AlarmModel> queue;
-    int sizeOfQueue = 5;
+    int sizeOfQueue;
     
-    
+    /**
+     *
+     */
     public AlarmController(){
+        this.sizeOfQueue = 5;
         queue = new SortedArrayPriorityQueue<>(sizeOfQueue);
     }
     
     //This functions gets how large the queue size is
+
+    /**
+     *
+     * @return
+     */
     public int getSize(){
         return queue.getSize();
     }
     
    
     //This gets the alarm at the head of the queue
+
+    /**
+     *
+     * @return
+     * @throws QueueUnderflowException
+     */
     public AlarmModel getNextAlarm() throws QueueUnderflowException
     {
         return queue.head();
     }
     
     //This function removes the alarm from the front of the queue
+
+    /**
+     *
+     * @throws QueueUnderflowException
+     */
     public void removeAlarm() throws QueueUnderflowException 
     {
         queue.remove();
     }
     
+    /**
+     *
+     * @param index
+     * @return
+     * @throws NullPointerException
+     */
     public AlarmModel getAlarmAtIndex(int index) throws NullPointerException
     {
        return queue.getItemAtIndex(index);
     }
     
     //This takes the alarms in the priority queue and writes them to a json file
+
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
     public boolean saveAlarms() throws Exception
     {
         JSONArray array = new JSONArray();
@@ -75,6 +106,12 @@ public class AlarmController {
     }
     
     //This retrieves the file from a json file and attempts to add the alarms to the array
+
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
     public boolean loadAlarms() throws Exception
     { 
         JSONParser jsonParser = new JSONParser();
@@ -101,6 +138,13 @@ public class AlarmController {
     }
     
     //This function adds the alarm object to the priority queue
+
+    /**
+     *
+     * @param date
+     * @return
+     * @throws QueueOverflowException
+     */
     public boolean addAlarm(Date date) throws QueueOverflowException {
         AlarmModel newAlarm = new AlarmModel(date);
         int priority = (int) date.getTime();
@@ -109,6 +153,12 @@ public class AlarmController {
     }
     
     //This function checks to see if the next alarm is currently after the current time
+
+    /**
+     *
+     * @return
+     * @throws QueueUnderflowException
+     */
     public boolean checkAlarm() throws QueueUnderflowException
     {
         AlarmModel nextAlarm = getNextAlarm();

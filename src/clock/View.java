@@ -20,6 +20,11 @@ public class View implements Observer {
     
     
     //Creates the main interface
+
+    /**
+     *
+     * @param model
+     */
     public View(Model model) {
         
         //First of all, we create a frame that'll be the container for the GUI elements
@@ -121,6 +126,10 @@ public class View implements Observer {
     }
     
     //This function will get the list of alarms in the queue and display them
+
+    /**
+     *
+     */
     public void addAlarm()
     {
         //Clear the panel of all GUI elements
@@ -141,6 +150,12 @@ public class View implements Observer {
     }
     
     //Updates the clock face and also checks if the alarm conditions are met
+
+    /**
+     *
+     * @param o
+     * @param arg
+     */
     @Override
     public void update(Observable o, Object arg) {
         panel.repaint();
@@ -158,6 +173,11 @@ public class View implements Observer {
     }
     
     //This shows a GUI interface for creating a new alarm object
+
+    /**
+     *
+     * @throws Exception
+     */
     public void openAlarmDialog() throws Exception
     {
         JPanel panel = new JPanel();

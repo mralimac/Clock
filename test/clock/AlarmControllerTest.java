@@ -35,8 +35,10 @@ public class AlarmControllerTest {
             instance.addAlarm(date2);
             AlarmModel headAlarm = instance.getNextAlarm(); 
             assertEquals(date1.getTime(), headAlarm.getDate().getTime());
-        }catch(Exception e){
-            fail("Error Detected");
+        }catch(QueueOverflowException e){
+            fail("Overflow Detected");
+        }catch(QueueUnderflowException e){
+            fail("Underflow Detected");
         }
     }
     
@@ -51,8 +53,10 @@ public class AlarmControllerTest {
             instance.addAlarm(date);
             AlarmModel headAlarm = instance.getNextAlarm();
             assertEquals(headAlarm.getDate(), date);
-        }catch(Exception e){
-            fail("Error detected");
+        }catch(QueueOverflowException e){
+            fail("Overflow Detected");
+        }catch(QueueUnderflowException e){
+            fail("Underflow Detected");
         }
     }
     
@@ -71,8 +75,8 @@ public class AlarmControllerTest {
         }catch(QueueOverflowException e)
         {
             fail("Overflow Detected");
-        }catch(Exception e){
-            fail("Exception detected");
+        }catch(QueueUnderflowException e){
+            fail("Underflow Detected");
         }
         
         
@@ -81,6 +85,7 @@ public class AlarmControllerTest {
     
     /**
      * Test overload of alarm, of class AlarmController.
+     * @throws java.lang.Exception
      */
     @Test(expected = QueueOverflowException.class)
     public void testOverload() throws Exception{
@@ -109,6 +114,9 @@ public class AlarmControllerTest {
         
     }
     
+    /**
+     *
+     */
     @Test
     public void testSaveAlarms(){
         AlarmController instance = new AlarmController();
@@ -129,6 +137,9 @@ public class AlarmControllerTest {
         
     }
     
+    /**
+     *
+     */
     @Test
     public void testRemoveAlarms(){
         AlarmController instance = new AlarmController();
@@ -149,6 +160,9 @@ public class AlarmControllerTest {
         }
     }
     
+    /**
+     *
+     */
     @Test
     public void testLoadAlarms(){
         AlarmController instance = new AlarmController();

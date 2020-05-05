@@ -16,23 +16,42 @@ import java.util.Date;
  */
 public class AlarmModel {
     
+    /**
+     *
+     */
     protected Date date;
     
+    /**
+     *
+     * @param date
+     */
     public AlarmModel(Date date){
         
         this.date = date;
     }
     
+    /**
+     *
+     * @return
+     */
     public Date getDate()
     {
         return this.date;
     }
     
+    /**
+     *
+     * @param date
+     */
     public void setDate(Date date)
     {
         this.date = date;
     }
     
+    /**
+     *
+     * @return
+     */
     public String getString()
     {        
         DateFormat d = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
