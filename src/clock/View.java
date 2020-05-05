@@ -68,9 +68,11 @@ public class View implements Observer {
             }  
         });
         
+        //This adds an event to the save button
         saveButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 try{
+                    //Attempt to save alarms, display a message if successful
                     if(alarmController.saveAlarms()){
                         JOptionPane.showMessageDialog(null, "Alarms saved successfully");
                     }
@@ -81,6 +83,7 @@ public class View implements Observer {
             }  
         });
         
+        //This adds an event to the load button
         loadButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){ 
                 try{
@@ -93,8 +96,10 @@ public class View implements Observer {
             }  
         });
         
+        //This adds an event to the exit button
         exitButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){ 
+                //Asks the user if they want to save the current alarms that are in the PriorityQueue. Yes for save, no will exit without saving
                 int exitPane = JOptionPane.showConfirmDialog(null, "Do you want to save your alarms?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
                 if(exitPane == JOptionPane.OK_OPTION)
                 {
@@ -109,25 +114,25 @@ public class View implements Observer {
                 }else{
                     System.exit(0);
                 }
-                
             }  
         });
-        
         frame.pack();
         frame.setVisible(true);
     }
     
     //This function will get the list of alarms in the queue and display them
-    public void addAlarm() throws Exception
+    public void addAlarm()
     {
+        //Clear the panel of all GUI elements
         alarmPanel.removeAll();
         alarmPanel.revalidate();
         alarmPanel.repaint();
         for(int i = 0; i < alarmController.getSize(); i++)
         {
+            //Add alarm GUI item to the panel
             try{
                 AlarmModel alarm = alarmController.getAlarmAtIndex(i);
-                alarmPanel.add(new JButton(alarm.getString()));
+                alarmPanel.add(new JLabel("<html>Next Alarm: <br><strong>" + alarm.getString()+"</strong></html>" ));
                 alarmPanel.revalidate();
                 alarmPanel.repaint();
             }catch(NullPointerException e){
@@ -139,14 +144,16 @@ public class View implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         panel.repaint();
+        addAlarm();
+        
         try{
-            addAlarm();
             if(alarmController.checkAlarm())
             {
+                //This pops up if the alarm conditions are met
                 JOptionPane.showMessageDialog(null, "Alarm Triggered");
             }
-        }catch(Exception e)
-        {
+        }catch(QueueUnderflowException e){
+            
         }
     }
     
@@ -162,14 +169,14 @@ public class View implements Observer {
         JLabel dateLabel = new JLabel();
         dateLabel.setText("Enter Date as DD/MM/YYYY");
         
-        
+        //Create a formatted text input with masked inputs to allow only numbers
         MaskFormatter timeMask = null;
         MaskFormatter dateMask = null;
         
-        timeMask = new MaskFormatter("##:##:##");//the # is for numeric values
+        timeMask = new MaskFormatter("##:##:##");
         timeMask.setPlaceholderCharacter('#');
 
-        dateMask = new MaskFormatter("##/##/####");//the # is for numeric values
+        dateMask = new MaskFormatter("##/##/####");
         dateMask.setPlaceholderCharacter('#');
         
         
@@ -185,14 +192,17 @@ public class View implements Observer {
         
         if (dialogBox == JOptionPane.OK_OPTION) {
             try{
+                //Attempt to create a date from the supplied string, if successful then go onto adding an alarm
                 String combinedString = dateFormat.getText() + " " + timeFormat.getText();
                 Date date = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").parse(combinedString);  
                 alarmController.addAlarm(date);
                 
             }catch(ParseException e){
+                //This triggers if the inputted data cannot be an date. This throws the user back to the input screen
                 JOptionPane.showMessageDialog(null, "Incorrect date format entered. Please retry");
                 openAlarmDialog();
             }catch(QueueOverflowException e){
+                //This triggers if too many alarms have been added
                 JOptionPane.showMessageDialog(null, "Cannot add anymore alarms. Queue is full");
             }
         }

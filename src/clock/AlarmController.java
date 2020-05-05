@@ -109,7 +109,7 @@ public class AlarmController {
     }
     
     //This function checks to see if the next alarm is currently after the current time
-    public boolean checkAlarm() throws Exception
+    public boolean checkAlarm() throws QueueUnderflowException
     {
         AlarmModel nextAlarm = getNextAlarm();
         long now = Instant.now().toEpochMilli();
