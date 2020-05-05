@@ -141,13 +141,37 @@ public class View implements Observer {
             //Add alarm GUI item to the panel
             try{
                 AlarmModel alarm = alarmController.getAlarmAtIndex(i);
-                alarmPanel.add(new JLabel("<html>Next Alarm: <br><strong>" + alarm.getString()+"</strong></html>" ));
+                if(i == 0)
+                {
+                    JButton button = new JButton("<html>Click to remove this alarm<br><strong>" + alarm.getString()+"</strong></html>" );
+                    alarmPanel.add(button);
+
+                    button.addActionListener(new ActionListener(){
+                        public void actionPerformed(ActionEvent e){ 
+                            try{
+                                alarmController.removeAlarm();
+                                JOptionPane.showMessageDialog(null, "Successfully removed alarm");
+                            }catch(QueueUnderflowException ex){
+                                JOptionPane.showMessageDialog(null, "Failed to remove alarm");
+                            }catch(HeadlessException ex)
+                            {
+                                JOptionPane.showMessageDialog(null, "Failed to remove alarm");
+                            }
+                        }  
+                    });
+                }else{
+                    JButton button = new JButton("<html>Alarm "+i+":<br><strong>" + alarm.getString()+"</strong></html>" );
+                    alarmPanel.add(button);
+                }
+
+                
                 alarmPanel.revalidate();
                 alarmPanel.repaint();
             }catch(NullPointerException e){
             }
         }
     }
+    
     
     //Updates the clock face and also checks if the alarm conditions are met
 
