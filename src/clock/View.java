@@ -170,13 +170,10 @@ public class View implements Observer {
         dateLabel.setText("Enter Date as DD/MM/YYYY");
         
         //Create a formatted text input with masked inputs to allow only numbers
-        MaskFormatter timeMask = null;
-        MaskFormatter dateMask = null;
-        
-        timeMask = new MaskFormatter("##:##:##");
+        MaskFormatter timeMask = new MaskFormatter("##:##:##");
         timeMask.setPlaceholderCharacter('#');
 
-        dateMask = new MaskFormatter("##/##/####");
+        MaskFormatter dateMask = new MaskFormatter("##/##/####");
         dateMask.setPlaceholderCharacter('#');
         
         
